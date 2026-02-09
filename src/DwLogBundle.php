@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dragonwize\DwLog;
+namespace Dragonwize\DwLogBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
