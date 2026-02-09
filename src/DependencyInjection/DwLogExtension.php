@@ -16,7 +16,8 @@ class DwLogExtension extends Extension
         $configuration = new Configuration();
         $config        = $this->processConfiguration($configuration, $configs);
 
-        // Set the conn name as a parameter
+        // Create parameters.
+        $container->setParameter('dw_log.enabled', $config['enabled']);
         $container->setParameter('dw_log.connection_name', $config['connection_name']);
 
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));

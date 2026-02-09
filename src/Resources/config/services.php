@@ -35,10 +35,16 @@ return static function (ContainerConfigurator $container): void {
 
     // Register console commands
     $services->set(CreateTableCommand::class)
-        ->args([service('dw_log.doctrine_dbal.connection')])
+        ->args([
+            param('dw_log.enabled'),
+            service('dw_log.doctrine_dbal.connection')
+        ])
         ->tag('console.command');
 
     $services->set(DropTableCommand::class)
-        ->args([service('dw_log.doctrine_dbal.connection')])
+        ->args([
+            param('dw_log.enabled'),
+            service('dw_log.doctrine_dbal.connection')
+        ])
         ->tag('console.command');
 };

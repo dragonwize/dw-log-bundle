@@ -21,6 +21,7 @@ class DropTableCommand extends Command
     private const string TABLE_NAME = 'dw_log';
 
     public function __construct(
+        private readonly bool $isEnabled,
         private readonly Connection $conn
     ) {
         parent::__construct();
@@ -38,6 +39,11 @@ class DropTableCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (!$this->isEnabled) {
+            // Not enabled in this environment.
+            return Command::SUCCESS;
+        }
+
         $io = new SymfonyStyle($input, $output);
 
         // Check if table exists using plain SQL

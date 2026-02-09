@@ -15,6 +15,7 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
+                ->booleanNode('enabled')->defaultTrue()->end()
                 ->scalarNode('connection_name')
                     ->info('The Doctrine DBAL connection name to use')
                     ->defaultValue('default')
