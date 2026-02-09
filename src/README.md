@@ -39,7 +39,7 @@ monolog:
     handlers:
         dbal:
             type: service
-            id: Dragonwize\DwLog\Monolog\DbalHandler
+            id: Dragonwize\DwLogBundle\Monolog\DbalHandler
             level: debug
             channels: ["!event", "!doctrine"]
 ```

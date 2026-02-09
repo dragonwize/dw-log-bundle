@@ -1,0 +1,207 @@
+{% extends '@DwLog/base.html.twig' %}
+
+{% block body %}
+    <div class="container py-4">
+        <div class="mb-4">
+            <h1 class="display-6 fw-bold mb-2">App Logs</h1>
+        </div>
+
+        {# Search and Filter Form #}
+        <div class="card mb-4 w-50">
+            <div class="card-body">
+                <form method="get" action="{{ path('dw_log_index') }}">
+                    <div class="g-3 mb-3">
+                        <label for="search" class="form-label small">Search Message</label>
+                        <input
+                                type="text"
+                                id="search"
+                                name="search"
+                                value="{{ search }}"
+                                placeholder="Search in messages..."
+                                class="form-control bg-dark text-light border-secondary"
+                        >
+                        <div class="row">
+                            <div class="col-6 col-md-4">
+                                <label for="level" class="form-label small">Level</label>
+                                <select
+                                        id="level"
+                                        name="level"
+                                        class="form-select bg-dark text-light border-secondary"
+                                >
+                                    <option value="">All</option>
+                                    {% for levelOption in levels %}
+                                        <option value="{{ levelOption }}" {% if level == levelOption %}selected{% endif %}>
+                                            {{ levelOption }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <label for="channel" class="form-label small">Channel</label>
+                                <select
+                                        id="channel"
+                                        name="channel"
+                                        class="form-select bg-dark text-light border-secondary"
+                                >
+                                    <option value="">All</option>
+                                    {% for channelOption in channels %}
+                                        <option value="{{ channelOption }}" {% if channel == channelOption %}selected{% endif %}>
+                                            {{ channelOption }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button
+                                type="submit"
+                                class="btn btn-primary"
+                        >
+                            Apply Filters
+                        </button>
+                        <a
+                                href="{{ path('dw_log_index') }}"
+                                class="btn btn-secondary"
+                        >
+                            Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {# Results Info #}
+        <div class="mb-3 small text-muted">
+            Showing {{ logs|length }} of {{ totalItems }} logs (Page {{ currentPage }} of {{ totalPages }})
+        </div>
+
+        {# Log list #}
+        <div class="w-50">
+            {% for log in logs %}
+                {% if log.level_name in ['EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR'] %}
+                    {% set log_style = 'danger' %}
+                {% elseif log.level_name == 'WARNING' %}
+                    {% set log_style = 'warning' %}
+                {% elseif log.level_name == 'NOTICE' %}
+                    {% set log_style = 'primary' %}
+                {% elseif log.level_name == 'INFO' %}
+                    {% set log_style = 'info' %}
+                {% else %}
+                    {% set log_style = 'secondary' %}
+                {% endif %}
+                <div class="card focus-ring focus-ring-light mb-3" tabindex="0">
+                    <div class="card-body rounded-top text-bg-{{ log_style }}" data-bs-toggle="offcanvas" data-bs-target="#off-canvas-{{ loop.index }}">
+                        <p class="card-text">
+                            {{ log.message }}
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                    <span class="badge rounded-pill font-monospace small text-bg-{{ log_style }}">
+                            {{ log.level_name|lower }}
+                        </span>
+                        <span class="badge rounded-pill font-monospace small text-bg-dark">
+                            {{ log.channel }}
+                        </span>
+                        <span>
+                            {{ log.created_at|date('Y-m-d H:i:s.v', 'America/New_York') }}
+                        </span>
+                    </div>
+                </div>
+                {% if log.context is not empty or log.extra is not empty %}
+                    <div class="offcanvas offcanvas-end w-50" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="off-canvas-{{ loop.index }}">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title">Log Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            {{ log.message }}
+                            {{ log.created_at }}
+                            {% if log.context is not empty %}
+                                <div class="bg-black rounded p-3 overflow-auto">
+                                    <pretty-json>
+                                        {{ log.context }}
+                                    </pretty-json>
+                                </div>
+                            {% endif %}
+                            {% if log.extra is not empty %}
+                                <div class="bg-black rounded p-3 overflow-auto">
+                                    <pretty-json>
+                                        {{ log.extra }}
+                                    </pretty-json>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-5">
+                        No logs found matching your criteria.
+                    </td>
+                </tr>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# Pagination #}
+    {% if totalPages > 1 %}
+        <nav aria-label="Log pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if currentPage > 1 %}
+                    <li class="page-item">
+                        <a
+                                href="{{ path('dw_log_index', {page: currentPage - 1, search: search, level: level, channel: channel}) }}"
+                                class="page-link bg-dark text-light border-secondary"
+                        >
+                            Previous
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for page in 1..totalPages %}
+                    {% if page == currentPage %}
+                        <li class="page-item active">
+                            <span class="page-link bg-primary border-primary">{{ page }}</span>
+                        </li>
+                    {% elseif page >= currentPage - 2 and page <= currentPage + 2 %}
+                        <li class="page-item">
+                            <a
+                                    href="{{ path('dw_log_index', {page: page, search: search, level: level, channel: channel}) }}"
+                                    class="page-link bg-dark text-light border-secondary"
+                            >
+                                {{ page }}
+                            </a>
+                        </li>
+                    {% elseif page == 1 or page == totalPages %}
+                        <li class="page-item">
+                            <a
+                                    href="{{ path('dw_log_index', {page: page, search: search, level: level, channel: channel}) }}"
+                                    class="page-link bg-dark text-light border-secondary"
+                            >
+                                {{ page }}
+                            </a>
+                        </li>
+                    {% elseif (page == 2 and currentPage > 4) or (page == totalPages - 1 and currentPage < totalPages - 3) %}
+                        <li class="page-item disabled">
+                            <span class="page-link bg-dark text-light border-secondary">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if currentPage < totalPages %}
+                    <li class="page-item">
+                        <a
+                                href="{{ path('dw_log_index', {page: currentPage + 1, search: search, level: level, channel: channel}) }}"
+                                class="page-link bg-dark text-light border-secondary"
+                        >
+                            Next
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+    </div>
+{% endblock %}
