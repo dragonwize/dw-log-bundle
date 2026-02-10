@@ -93,9 +93,9 @@ class LogRepository
      */
     public function getDistinctLevels(): array
     {
-        $sql = 'SELECT DISTINCT level_name 
+        $sql = 'SELECT DISTINCT level_name, level 
                 FROM ' . self::TABLE_NAME . ' 
-                ORDER BY level DESC';
+                ORDER BY level, level_name DESC';
 
         $result = $this->conn->executeQuery($sql)->fetchFirstColumn();
 

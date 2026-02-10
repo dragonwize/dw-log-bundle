@@ -37,6 +37,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set(CreateTableCommand::class)
         ->args([
             param('dw_log.enabled'),
+            param('dw_log.connection_name'),
             service('dw_log.doctrine_dbal.connection')
         ])
         ->tag('console.command');

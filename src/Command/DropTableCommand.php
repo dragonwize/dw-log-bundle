@@ -67,12 +67,8 @@ class DropTableCommand extends Command
             }
         }
 
-        $io->info(\sprintf('Dropping table "%s"...', self::TABLE_NAME));
-
         try {
             $this->conn->executeStatement('DROP TABLE ' . self::TABLE_NAME);
-
-            $io->success(\sprintf('Table "%s" dropped successfully!', self::TABLE_NAME));
 
             return Command::SUCCESS;
         } catch (\Exception $e) {

@@ -9,6 +9,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -23,6 +24,7 @@ class CreateTableCommand extends Command
 
     public function __construct(
         private readonly bool $isEnabled,
+        private readonly string $connName,
         private readonly Connection $conn
     ) {
         parent::__construct();
@@ -37,14 +39,23 @@ class CreateTableCommand extends Command
 
         $io = new SymfonyStyle($input, $output);
 
-        // Check if table already exists using plain SQL
-        if ($this->tableExists()) {
-            $io->info(\sprintf('Table "%s" already exists.', self::TABLE_NAME));
-
-            return Command::SUCCESS;
+        // Ensure database exists.
+        $dbCreateInput = new ArrayInput([
+            'command' => 'doctrine:database:create',
+            '--if-not-exists' => true,
+            '--connection' => $this->connName,
+        ]);
+        $dbCreateInput->setInteractive(false);
+        $dbCreateReturnCode = $this->getApplication()->doRun($dbCreateInput, $output);
+        if ($dbCreateReturnCode !== Command::SUCCESS) {
+            $io->error('Failed to create database.');
+            return Command::FAILURE;
         }
 
-        $io->info(\sprintf('Creating table "%s"...', self::TABLE_NAME));
+        // Check if table already exists using plain SQL
+        if ($this->tableExists()) {
+            return Command::SUCCESS;
+        }
 
         // Create schema
         $schema = new Schema();
