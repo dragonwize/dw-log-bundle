@@ -25,27 +25,34 @@ class DbalHandler extends AbstractProcessingHandler
 
     protected function write(LogRecord $record): void
     {
-        $this->conn->insert(
-            self::TABLE_NAME,
-            [
-                'channel'    => $record->channel,
-                'level'      => $record->level->value,
-                'level_name' => $record->level->getName(),
-                'message'    => $record->message,
-                'context'    => json_encode($record->context),
-                'extra'      => json_encode($record->extra),
-                'created_at' => CarbonImmutable::now('UTC')->toIso8601ZuluString('millisecond'),
-                // 'created_at' => date('Y-m-d H:i:s.v'),
-            ],
-            [
-                'channel'    => ParameterType::STRING,
-                'level'      => ParameterType::INTEGER,
-                'level_name' => ParameterType::STRING,
-                'message'    => ParameterType::STRING,
-                'context'    => ParameterType::STRING,
-                'extra'      => ParameterType::STRING,
-                'created_at' => ParameterType::STRING,
-            ]
-        );
+        try {
+            $this->conn->insert(
+                self::TABLE_NAME,
+                [
+                    'channel'    => $record->channel,
+                    'level'      => $record->level->value,
+                    'level_name' => $record->level->getName(),
+                    'message'    => $record->message,
+                    'context'    => json_encode($record->context),
+                    'extra'      => json_encode($record->extra),
+                    'created_at' => CarbonImmutable::now('UTC')->toIso8601ZuluString('millisecond'),
+                ],
+                [
+                    'channel'    => ParameterType::STRING,
+                    'level'      => ParameterType::INTEGER,
+                    'level_name' => ParameterType::STRING,
+                    'message'    => ParameterType::STRING,
+                    'context'    => ParameterType::STRING,
+                    'extra'      => ParameterType::STRING,
+                    'created_at' => ParameterType::STRING,
+                ]
+            );
+        } catch (\Throwable $e) {
+            // If fail writing to DB based log, silently continue to prevent
+            // circular dependency issues. DB base logging should not be the
+            // only log access used.
+            // This could be prevented by creating the table and schema outside
+            // of Symfony but that would hurt/complicate the DX.
+        }
     }
 }
