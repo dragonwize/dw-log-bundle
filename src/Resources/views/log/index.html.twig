@@ -22,19 +22,24 @@
                         >
                         <div class="row">
                             <div class="col-6 col-md-4">
-                                <label for="level" class="form-label small">Level</label>
-                                <select
-                                        id="level"
-                                        name="level"
-                                        class="form-select bg-dark text-light border-secondary"
-                                >
-                                    <option value="">All</option>
+                                <label class="form-label small">Level</label>
+                                <div class="d-flex flex-column gap-1">
                                     {% for levelOption in levels %}
-                                        <option value="{{ levelOption }}" {% if level == levelOption %}selected{% endif %}>
-                                            {{ levelOption }}
-                                        </option>
+                                        <div class="form-check">
+                                            <input
+                                                    type="checkbox"
+                                                    id="level_{{ levelOption }}"
+                                                    name="level[]"
+                                                    value="{{ levelOption }}"
+                                                    class="form-check-input bg-dark border-secondary"
+                                                    {% if levelOption in level %}checked{% endif %}
+                                            >
+                                            <label class="form-check-label small" for="level_{{ levelOption }}">
+                                                {{ levelOption }}
+                                            </label>
+                                        </div>
                                     {% endfor %}
-                                </select>
+                                </div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <label for="channel" class="form-label small">Channel</label>
@@ -150,14 +155,14 @@
         <nav aria-label="Log pagination" class="mt-4">
             <ul class="pagination justify-content-center">
                 {% if currentPage > 1 %}
-                    <li class="page-item">
-                        <a
-                                href="{{ path('dw_log_index', {page: currentPage - 1, search: search, level: level, channel: channel}) }}"
-                                class="page-link bg-dark text-light border-secondary"
-                        >
-                            Previous
-                        </a>
-                    </li>
+                        <li class="page-item">
+                            <a
+                                    href="{{ path('dw_log_index', {page: page, search: search, 'level[]': level, channel: channel}) }}"
+                                    class="page-link bg-dark text-light border-secondary"
+                            >
+                                {{ page }}
+                            </a>
+                        </li>
                 {% endif %}
 
                 {% for page in 1..totalPages %}
@@ -193,7 +198,7 @@
                 {% if currentPage < totalPages %}
                     <li class="page-item">
                         <a
-                                href="{{ path('dw_log_index', {page: currentPage + 1, search: search, level: level, channel: channel}) }}"
+                                href="{{ path('dw_log_index', {page: currentPage + 1, search: search, 'level[]': level, channel: channel}) }}"
                                 class="page-link bg-dark text-light border-secondary"
                         >
                             Next

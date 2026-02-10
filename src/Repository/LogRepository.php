@@ -19,13 +19,14 @@ class LogRepository
     /**
      * Find logs with pagination and optional filters.
      *
+     * @param array<string>|null $level
      * @return array{logs: array<array<string, mixed>>, total: int}
      */
     public function findWithPagination(
         int $page = 1,
         int $limit = 50,
         ?string $search = null,
-        ?string $level = null,
+        ?array $level = null,
         ?string $channel = null
     ): array {
         $offset = ($page - 1) * $limit;
@@ -41,10 +42,15 @@ class LogRepository
             $types['search']  = ParameterType::STRING;
         }
 
-        if ($level !== null && $level !== '') {
-            $whereClauses[]  = 'level_name = :level';
-            $params['level'] = $level;
-            $types['level']  = ParameterType::STRING;
+        if ($level !== null && $level !== []) {
+            $placeholders = [];
+            foreach ($level as $index => $levelValue) {
+                $paramName                = "level_{$index}";
+                $placeholders[]           = ":{$paramName}";
+                $params[$paramName]       = $levelValue;
+                $types[$paramName]        = ParameterType::STRING;
+            }
+            $whereClauses[] = 'level_name IN (' . implode(', ', $placeholders) . ')';
         }
 
         if ($channel !== null && $channel !== '') {

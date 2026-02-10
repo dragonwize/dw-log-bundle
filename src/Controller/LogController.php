@@ -23,7 +23,7 @@ final class LogController
     {
         $page    = max(1, $request->query->getInt('page', 1));
         $search  = $request->query->getString('search', '');
-        $level   = $request->query->getString('level', '');
+        $level   = $request->query->all('level') ?? [];
         $channel = $request->query->getString('channel', '');
         $limit   = 50;
 
@@ -31,7 +31,7 @@ final class LogController
             page: $page,
             limit: $limit,
             search: $search !== '' ? $search : null,
-            level: $level !== '' ? $level : null,
+            level: $level !== [] ? $level : null,
             channel: $channel !== '' ? $channel : null
         );
 
