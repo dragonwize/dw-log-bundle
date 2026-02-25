@@ -157,10 +157,10 @@
                 {% if currentPage > 1 %}
                         <li class="page-item">
                             <a
-                                    href="{{ path('dw_log_index', {page: page, search: search, 'level[]': level, channel: channel}) }}"
+                                    href="{{ path('dw_log_index', {page: currentPage - 1, search: search, 'level[]': level, channel: channel}) }}"
                                     class="page-link bg-dark text-light border-secondary"
                             >
-                                {{ page }}
+                                Prev
                             </a>
                         </li>
                 {% endif %}

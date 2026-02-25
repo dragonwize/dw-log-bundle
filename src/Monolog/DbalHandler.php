@@ -32,7 +32,7 @@ class DbalHandler extends AbstractProcessingHandler
                     'channel'    => $record->channel,
                     'level'      => $record->level->value,
                     'level_name' => $record->level->getName(),
-                    'message'    => $record->message,
+                    'message'    => $this->replacePlaceholders($record->message, $record->context),
                     'context'    => json_encode($record->context),
                     'extra'      => json_encode($record->extra),
                     'created_at' => CarbonImmutable::now('UTC')->toIso8601ZuluString('millisecond'),
@@ -54,5 +54,17 @@ class DbalHandler extends AbstractProcessingHandler
             // This could be prevented by creating the table and schema outside
             // of Symfony but that would hurt/complicate the DX.
         }
+    }
+
+    public function replacePlaceholders(string $message, array $context): string
+    {
+        foreach ($context as $key => $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+            $message = str_replace('{' . $key . '}', (string) $value, $message);
+        }
+
+        return $message;
     }
 }
