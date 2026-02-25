@@ -59,7 +59,13 @@ class DbalHandler extends AbstractProcessingHandler
     public function replacePlaceholders(string $message, array $context): string
     {
         foreach ($context as $key => $value) {
-            if (!is_string($value)) {
+            if (is_bool($value)) {
+                $value = $value ? 'true' : 'false';
+            }
+            if (is_null($value)) {
+                $value = 'null';
+            }
+            if (!is_scalar($value)) {
                 continue;
             }
             $message = str_replace('{' . $key . '}', (string) $value, $message);
