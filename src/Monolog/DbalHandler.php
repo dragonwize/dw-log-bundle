@@ -10,13 +10,15 @@ use Doctrine\DBAL\ParameterType;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class DbalHandler extends AbstractProcessingHandler
 {
-    private const TABLE_NAME = 'dw_log';
+    protected const TABLE_NAME = 'dw_log';
 
     public function __construct(
-        private Connection $conn,
+        protected Connection $conn,
+        protected SerializerInterface $serializer,
         int|string|Level $level = Level::Debug,
         bool $bubble = true
     ) {
@@ -33,8 +35,8 @@ class DbalHandler extends AbstractProcessingHandler
                     'level'      => $record->level->value,
                     'level_name' => $record->level->getName(),
                     'message'    => $this->replacePlaceholders($record->message, $record->context),
-                    'context'    => json_encode($record->context),
-                    'extra'      => json_encode($record->extra),
+                    'context'    => $this->serializer->serialize($record->context, 'json'),
+                    'extra'      => $this->serializer->serialize($record->extra, 'json'),
                     'created_at' => CarbonImmutable::now('UTC')->toIso8601ZuluString('millisecond'),
                 ],
                 [

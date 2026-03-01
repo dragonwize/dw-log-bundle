@@ -1,7 +1,7 @@
 {% extends '@DwLog/base.html.twig' %}
 
 {% block body %}
-    <div class="container py-4">
+    <div class="container-full py-4 m-4">
         <div class="mb-4">
             <h1 class="display-6 fw-bold mb-2">App Logs</h1>
         </div>
@@ -152,8 +152,8 @@
 
     {# Pagination #}
     {% if totalPages > 1 %}
-        <nav aria-label="Log pagination" class="mt-4">
-            <ul class="pagination justify-content-center">
+        <nav aria-label="Log pagination" class="m-4">
+            <ul class="pagination justify-content-start">
                 {% if currentPage > 1 %}
                         <li class="page-item">
                             <a
@@ -208,5 +208,4 @@
             </ul>
         </nav>
     {% endif %}
-    </div>
 {% endblock %}

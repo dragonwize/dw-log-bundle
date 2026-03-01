@@ -21,6 +21,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set(DbalHandler::class)
         ->args([
             service('dw_log.doctrine_dbal.connection'),
+            service('serializer'),
             'debug',
             true,
         ]);
